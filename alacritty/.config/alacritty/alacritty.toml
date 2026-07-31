@@ -1,0 +1,12 @@
+[window]
+decorations = "Buttonless"
+
+[font]
+normal = { family = "Iosevka", style = "Regular" }
+size = 14.0
+
+[[keyboard.bindings]]
+key = "Enter"
+mods = "Shift"
+chars = "\u001b[13;2u"
+
