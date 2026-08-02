@@ -19,6 +19,17 @@ local function is_tree_win(win)
   return vim.bo[buf].filetype == 'NvimTree'
 end
 
+-- Directory of the node under the tree's cursor, so fzf-lua searches can be
+-- scoped to it. Returns nil when the tree isn't focused or the node is the root.
+function M.tree_search_dir()
+  if not is_tree_win(vim.api.nvim_get_current_win()) then return nil end
+  local ok, node = pcall(require('nvim-tree.api').tree.get_node_under_cursor)
+  if not ok or not node or not node.absolute_path then return nil end
+  if node.type == 'directory' then return node.absolute_path end
+  if node.parent and node.parent.absolute_path then return node.parent.absolute_path end
+  return nil
+end
+
 -- Render the main buffer's statusline, so the single full-width statusline
 -- keeps showing the main buffer even while the nvim-tree window is focused.
 function M.main_statusline()

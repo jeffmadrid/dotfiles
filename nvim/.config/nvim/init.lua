@@ -477,13 +477,32 @@ do
   }
 
   local fzf_lua = require 'fzf-lua'
+
+  -- Scope a picker to the directory of the node under nvim-tree's cursor when
+  -- the tree is focused, otherwise use fzf-lua's default (git root / cwd).
+  local function tree_search()
+    return require('custom.plugins.nvim-tree').tree_search_dir()
+  end
+
   vim.keymap.set('n', '<leader>sh', fzf_lua.help_tags, { desc = '[S]earch [H]elp' })
   vim.keymap.set('n', '<leader>sk', fzf_lua.keymaps, { desc = '[S]earch [K]eymaps' })
-  vim.keymap.set('n', '<leader>sf', fzf_lua.files, { desc = '[S]earch [F]iles' })
+  vim.keymap.set('n', '<leader>sf', function()
+    local cwd = tree_search()
+    if cwd then fzf_lua.files { cwd = cwd } else fzf_lua.files() end
+  end, { desc = '[S]earch [F]iles' })
   vim.keymap.set('n', '<leader>ss', fzf_lua.builtin, { desc = '[S]earch [S]elect fzf-lua' })
-  vim.keymap.set('n', '<leader>sw', fzf_lua.grep_cword, { desc = '[S]earch current [W]ord' })
-  vim.keymap.set('v', '<leader>sw', fzf_lua.grep_visual, { desc = '[S]earch selected [W]ord' })
-  vim.keymap.set('n', '<leader>sg', fzf_lua.live_grep, { desc = '[S]earch by [G]rep' })
+  vim.keymap.set('n', '<leader>sw', function()
+    local cwd = tree_search()
+    if cwd then fzf_lua.grep_cword { cwd = cwd } else fzf_lua.grep_cword() end
+  end, { desc = '[S]earch current [W]ord' })
+  vim.keymap.set('v', '<leader>sw', function()
+    local cwd = tree_search()
+    if cwd then fzf_lua.grep_visual { cwd = cwd } else fzf_lua.grep_visual() end
+  end, { desc = '[S]earch selected [W]ord' })
+  vim.keymap.set('n', '<leader>sg', function()
+    local cwd = tree_search()
+    if cwd then fzf_lua.live_grep { cwd = cwd } else fzf_lua.live_grep() end
+  end, { desc = '[S]earch by [G]rep' })
   vim.keymap.set('n', '<leader>sd', fzf_lua.diagnostics_document, { desc = '[S]earch [D]iagnostics' })
   vim.keymap.set('n', '<leader>sr', fzf_lua.resume, { desc = '[S]earch [R]esume' })
   vim.keymap.set('n', '<leader>s.', fzf_lua.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
