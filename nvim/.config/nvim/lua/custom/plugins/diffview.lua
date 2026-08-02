@@ -11,6 +11,9 @@ require('diffview').setup {}
 -- Open the diff for the current change (falls back to current buffer)
 vim.keymap.set('n', '<leader>gd', '<Cmd>DiffviewOpen<CR>', { desc = 'Diffview open' })
 
+-- Close the diffview tab
+vim.keymap.set('n', '<leader>gD', '<Cmd>DiffviewClose<CR>', { desc = 'Diffview close' })
+
 -- Git history of the current file
 vim.keymap.set('n', '<leader>gh', '<Cmd>DiffviewFileHistory %<CR>', { desc = 'Diffview file history' })
 
