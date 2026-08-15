@@ -211,6 +211,17 @@ do
 
   vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+  -- Copy the relative path of the current buffer to the system clipboard
+  vim.keymap.set('n', '<leader>cr', function()
+    local path = vim.fn.expand '%'
+    if path == '' then
+      vim.notify('Buffer is not a file', vim.log.levels.WARN)
+    else
+      vim.fn.setreg('+', path)
+      vim.notify('Copied: ' .. path, vim.log.levels.INFO)
+    end
+  end, { desc = '[C]opy [R]elative path of current file' })
+
   -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
   -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
   -- is not what someone will guess without a bit more experience.
@@ -364,6 +375,7 @@ do
     icons = { mappings = vim.g.have_nerd_font },
     -- Document existing key chains
     spec = {
+      { '<leader>c', group = '[C]opy' },
       { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
       { '<leader>t', group = '[T]oggle' },
       { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
