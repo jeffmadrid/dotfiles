@@ -4,9 +4,6 @@ require('mini.tabline').setup {
 }
 
 -- Close the current buffer
-vim.keymap.set('n', '<leader>bd', '<Cmd>bdelete<CR>', { desc = 'Buffer delete' })
-
--- Switch between buffers (click tabs in the tabline also works)
 vim.keymap.set('n', '<Tab>', '<Cmd>bnext<CR>', { desc = 'Next buffer' })
 vim.keymap.set('n', '<S-Tab>', '<Cmd>bprevious<CR>', { desc = 'Previous buffer' })
 vim.keymap.set('n', ']b', '<Cmd>bnext<CR>', { desc = 'Next buffer' })
