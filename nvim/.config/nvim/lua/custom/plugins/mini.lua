@@ -12,3 +12,15 @@ require('mini.ai').setup {
   },
   n_lines = 500,
 }
+
+-- mini.move - move any selection or line in any direction
+--
+-- Examples (defaults are Alt/Meta + hjkl):
+--  - <M-h>/<M-l> - move selection/line left/right
+--  - <M-j>/<M-k> - move selection/line down/up
+require('mini.move').setup {
+  options = {
+    -- Automatically reindent during vertical linewise moves (default)
+    reindent_linewise = true,
+  },
+}
