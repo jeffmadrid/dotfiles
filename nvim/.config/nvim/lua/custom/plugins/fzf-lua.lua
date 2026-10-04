@@ -20,6 +20,7 @@ vim.pack.add { 'https://github.com/ibhagwan/fzf-lua' }
 
 -- See `:help fzf-lua` for all available options
 require('fzf-lua').setup {
+  { 'borderless-full' },
   -- Mirror the nerd-font setting so icons only render with a Nerd Font installed
   defaults = {
     file_icons = vim.g.have_nerd_font,
@@ -28,7 +29,7 @@ require('fzf-lua').setup {
   -- Use fzf-lua as the UI for `vim.ui.select` (like telescope-ui-select)
   ui_select = {},
   winopts = {
-    width = 0.95,
+    width = 0.98,
     height = 0.95,
   },
 }
