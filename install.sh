@@ -7,6 +7,7 @@ PACKAGES=(
   alacritty
   herdr
   nvim
+  sesh
   tmux
   wezterm
 )
