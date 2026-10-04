@@ -1,2 +1,22 @@
+onboarding = false
+
+[theme]
+name = "gruvbox"
+
 [keys]
 prefix = "ctrl+a"
+switch_tab = ["prefix+1..9", "alt+1..9"]
+next_tab = ["prefix+n", "ctrl+tab"]
+previous_tab = ["prefix+p", "ctrl+shift+tab"]
+split_vertical = ["prefix+v", "prefix+|"]
+split_horizontal = ["prefix+minus"]
+
+[ui.toast]
+delivery = "herdr"
+
+# Move the focused pane into its own new tab.
+[[keys.command]]
+key = "prefix+!"
+type = "shell"
+command = "herdr pane move $HERDR_ACTIVE_PANE_ID --new-tab --focus"
+description = "move pane to new tab"
