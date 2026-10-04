@@ -24,3 +24,21 @@ require('mini.move').setup {
     reindent_linewise = true,
   },
 }
+
+-- mini.pairs - automatic brackets and quotes
+--
+-- Examples:
+--  - (   - inserts () and puts cursor between them
+--  - )   - inserts ) (or jumps over it if already there)
+--  - '   - toggles '' with cursor inside
+require('mini.pairs').setup()
+
+-- mini.indentscope - visualize and operate on the current indent scope
+--
+-- Examples:
+--  - ii  - select the scope's body
+--  - ai  - select the scope including its border line(s)
+--  - [i  - jump to scope's top
+--  - ]i  - jump to scope's bottom
+require('mini.indentscope').setup()
+
