@@ -1,9 +1,10 @@
 -- Nvim-tree is a Neovim plugin to browse the file system
 -- https://github.com/nvim-tree/nvim-tree.lua
 
+-- Icons come from mini.icons (see init.lua's mock_nvim_web_devicons), so the
+-- real nvim-web-devicons plugin is not needed.
 vim.pack.add {
   'https://github.com/nvim-tree/nvim-tree.lua',
-  'https://github.com/nvim-tree/nvim-web-devicons',
 }
 
 vim.keymap.set('n', '\\', '<Cmd>NvimTreeFindFile<CR>', { desc = 'NvimTree reveal', silent = true })

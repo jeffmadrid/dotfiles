@@ -65,7 +65,7 @@ vim.o.splitbelow = true
 --   See `:help lua-options`
 --   and `:help lua-guide-options`
 vim.o.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣', lead = '·'}
+vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
 vim.o.swapfile = false
 

@@ -3,7 +3,7 @@ require('mini.tabline').setup {
   show_icons = vim.g.have_nerd_font, -- icons only if a Nerd Font is installed
 }
 
--- Close the current buffer
+-- Cycle through buffers
 vim.keymap.set('n', '<Tab>', '<Cmd>bnext<CR>', { desc = 'Next buffer' })
 vim.keymap.set('n', '<S-Tab>', '<Cmd>bprevious<CR>', { desc = 'Previous buffer' })
 vim.keymap.set('n', ']b', '<Cmd>bnext<CR>', { desc = 'Next buffer' })
