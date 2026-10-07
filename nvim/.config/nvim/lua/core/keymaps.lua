@@ -5,6 +5,13 @@
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
+-- Delete blank lines into the black hole register, so they don't clobber the last yank
+-- (Vim applies a typed count to the expansion automatically, so no need to handle it here)
+vim.keymap.set('n', 'dd', function()
+  if vim.api.nvim_get_current_line():match '^%s*$' then return '"_dd' end
+  return 'dd'
+end, { expr = true, desc = 'Smart delete line (blank lines to black hole)' })
+
 -- Diagnostic Config & Keymaps
 --  See `:help vim.diagnostic.Opts`
 vim.diagnostic.config {
