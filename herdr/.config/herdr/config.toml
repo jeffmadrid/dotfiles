@@ -17,6 +17,7 @@ sidebar_collapsed_mode = "hidden"
 pane_borders = "off"
 pane_outer_borders = false
 status_indicators = "symbols"
+hide_tab_bar_when_single_tab = true
 
 [ui.toast]
 delivery = "herdr"
