@@ -20,7 +20,7 @@ vim.pack.add { 'https://github.com/ibhagwan/fzf-lua' }
 
 -- See `:help fzf-lua` for all available options
 require('fzf-lua').setup {
-  { 'borderless-full' },
+  { 'borderless-full', 'hide' },
   -- Mirror the nerd-font setting so icons only render with a Nerd Font installed
   defaults = {
     file_icons = vim.g.have_nerd_font,
