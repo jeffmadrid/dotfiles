@@ -2,6 +2,7 @@ onboarding = false
 
 [theme]
 name = "gruvbox"
+auto_switch = false
 
 [keys]
 prefix = "ctrl+a"
@@ -10,6 +11,12 @@ next_tab = ["prefix+n", "ctrl+tab"]
 previous_tab = ["prefix+p", "ctrl+shift+tab"]
 split_vertical = ["prefix+v", "prefix+|"]
 split_horizontal = ["prefix+minus"]
+
+[ui]
+sidebar_collapsed_mode = "hidden"
+pane_borders = "off"
+pane_outer_borders = false
+status_indicators = "symbols"
 
 [ui.toast]
 delivery = "herdr"
