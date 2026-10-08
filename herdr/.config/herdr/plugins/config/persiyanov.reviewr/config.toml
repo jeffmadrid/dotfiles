@@ -1,0 +1,6 @@
+# reviewr's own config file — herdr's config.toml does not reach it.
+#
+# Don't auto-open a reviewr pane on every worktree.create / worktree.open
+# (which `herd` dispatches trigger). Open it on demand with the toggle
+# binding (cmd+r) instead.
+auto_open = false
