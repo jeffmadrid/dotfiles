@@ -1,0 +1,91 @@
+#!/usr/bin/env zsh
+# herd — route a query to a worktree-backed herdr workspace.
+#   herd <branch> [query...]
+# The branch is the address: its worktree/workspace is created, opened, or
+# reused. Each query gets a FRESH opencode session in a new pane on the
+# workspace's first tab (nvim left, agents stacked right). No query = focus.
+
+if [[ "${HERDR_ENV:-}" != "1" ]]; then
+	echo "herd: must run inside a herdr pane (HERDR_ENV=1)" >&2
+	exit 1
+fi
+if ! command -v jq >/dev/null; then
+	echo "herd: jq is required (brew install jq)" >&2
+	exit 1
+fi
+if (( $# < 1 )); then
+	echo "usage: herd <branch> [query...]" >&2
+	exit 2
+fi
+
+branch="$1"; shift
+query="$*"
+fresh=1
+
+# locate the worktree for <branch> in the current repo
+json=$(herdr worktree list --cwd "$PWD") || exit 1
+ws_id=$(print -r -- "$json" | jq -r --arg b "$branch" \
+	'[.result.worktrees[] | select(.branch == $b)] | .[0] | .open_workspace_id // empty')
+on_disk=$(print -r -- "$json" | jq -r --arg b "$branch" \
+	'[.result.worktrees[] | select(.branch == $b)] | length')
+
+if [[ -z "$ws_id" && "$on_disk" == "0" && -z "$query" ]]; then
+	echo "herd: no worktree for branch '$branch' — provide a query to create it" >&2
+	exit 1
+fi
+
+if [[ -z "$ws_id" ]]; then
+	if [[ "$on_disk" == "0" ]]; then
+		json=$(herdr worktree create --cwd "$PWD" --branch "$branch" --label "${query:0:50}" --focus) || exit 1
+	else
+		json=$(herdr worktree open --cwd "$PWD" --branch "$branch" --focus) || exit 1
+	fi
+	ws_id=$(print -r -- "$json" | jq -r '.result.workspace.workspace_id // empty')
+	tab_id=$(print -r -- "$json" | jq -r '.result.tab.tab_id // empty')
+	agent_pane=$(print -r -- "$json" | jq -r '.result.root_pane.pane_id // empty')
+	[[ -n "$ws_id" && -n "$tab_id" && -n "$agent_pane" ]] || {
+		echo "herd: could not parse workspace for '$branch'" >&2; exit 1; }
+else
+	fresh=0
+	tab_id=$(herdr tab list --workspace "$ws_id" | jq -r '.result.tabs[0].tab_id // empty')
+	[[ -n "$tab_id" ]] || { echo "herd: no tabs in workspace $ws_id" >&2; exit 1; }
+fi
+
+# no query → just jump to the workspace
+if [[ -z "$query" ]]; then
+	herdr workspace focus "$ws_id"
+	exit $?
+fi
+
+if (( fresh )); then
+	# brand-new workspace: nvim takes the left pane, agent splits right
+	editor_pane="$agent_pane"
+	agent_pane=$(herdr pane split --pane "$editor_pane" --direction right \
+		| jq -r '.result.pane.pane_id // empty')
+	[[ -n "$agent_pane" ]] || { echo "herd: pane split failed" >&2; exit 1; }
+	herdr pane run "$editor_pane" "nvim ." || exit 1
+else
+	# existing workspace: stack the new agent into the first tab
+	last_agent=$(herdr pane list --workspace "$ws_id" | jq -r --arg t "$tab_id" \
+		'[.result.panes[] | select(.tab_id == $t and has("agent"))] | last | .pane_id // empty')
+	if [[ -n "$last_agent" ]]; then
+		agent_pane=$(herdr pane split --pane "$last_agent" --direction down \
+			| jq -r '.result.pane.pane_id // empty')
+	else
+		first_pane=$(herdr pane list --workspace "$ws_id" | jq -r --arg t "$tab_id" \
+			'[.result.panes[] | select(.tab_id == $t)] | .[0] | .pane_id // empty')
+		[[ -n "$first_pane" ]] || { echo "herd: no panes in tab $tab_id" >&2; exit 1; }
+		agent_pane=$(herdr pane split --pane "$first_pane" --direction right \
+			| jq -r '.result.pane.pane_id // empty')
+	fi
+	[[ -n "$agent_pane" ]] || { echo "herd: pane split failed" >&2; exit 1; }
+fi
+
+# fresh opencode session in the new pane
+base="${${${branch:l}//[^a-z0-9_-]/-}:0:24}"
+[[ "$base" =~ ^[a-z] ]] || base="a$base"
+name="${base}-${RANDOM}"
+
+herdr agent start "$name" --kind opencode --pane "$agent_pane" || exit 1
+herdr agent prompt "$name" "$query" || exit 1
+herdr agent focus "$name"
