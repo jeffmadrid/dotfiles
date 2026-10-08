@@ -34,11 +34,24 @@ if [[ -z "$ws_id" && "$on_disk" == "0" && -z "$query" ]]; then
 	exit 1
 fi
 
+# existing worktree with pending changes → stop; don't mix work into it
+if [[ "$on_disk" != "0" && -n "$query" ]]; then
+	wt_path=$(print -r -- "$json" | jq -r --arg b "$branch" \
+		'[.result.worktrees[] | select(.branch == $b)] | .[0] | .path // empty')
+	if [[ -n "$wt_path" ]] && [[ -n "$(git -C "$wt_path" status --porcelain 2>/dev/null)" ]]; then
+		echo "herd: worktree for '$branch' has pending changes — commit, stash, or clean them first:" >&2
+		echo "  $wt_path" >&2
+		git -C "$wt_path" status --short | head -20 >&2
+		echo "herd: tip — 'herd $branch' (no query) just focuses its workspace" >&2
+		exit 1
+	fi
+fi
+
 if [[ -z "$ws_id" ]]; then
 	if [[ "$on_disk" == "0" ]]; then
-		json=$(herdr worktree create --cwd "$PWD" --branch "$branch" --label "${query:0:50}" --focus) || exit 1
+		json=$(herdr worktree create --cwd "$PWD" --branch "$branch" --label "$branch" --focus) || exit 1
 	else
-		json=$(herdr worktree open --cwd "$PWD" --branch "$branch" --focus) || exit 1
+		json=$(herdr worktree open --cwd "$PWD" --branch "$branch" --label "$branch" --focus) || exit 1
 	fi
 	ws_id=$(print -r -- "$json" | jq -r '.result.workspace.workspace_id // empty')
 	tab_id=$(print -r -- "$json" | jq -r '.result.tab.tab_id // empty')
