@@ -1,9 +1,10 @@
 #!/usr/bin/env zsh
 # herd — route a query to a worktree-backed herdr workspace.
-#   herd <branch> [query...]
+#   herd [-a <kind>] <branch> [query...]
 # The branch is the address: its worktree/workspace is created, opened, or
-# reused. Each query gets a FRESH opencode session in a new pane on the
+# reused. Each query gets a FRESH agent session in a new pane on the
 # workspace's first tab (nvim left, agents stacked right). No query = focus.
+# Agent kind defaults to $HERD_AGENT, or opencode.
 
 if [[ "${HERDR_ENV:-}" != "1" ]]; then
 	echo "herd: must run inside a herdr pane (HERDR_ENV=1)" >&2
@@ -13,14 +14,30 @@ if ! command -v jq >/dev/null; then
 	echo "herd: jq is required (brew install jq)" >&2
 	exit 1
 fi
+agent_kind="${HERD_AGENT:-opencode}"
+while [[ "$1" == -* ]]; do
+	case "$1" in
+		-a|--agent)
+			[[ -n "$2" ]] || { echo "herd: -a requires an agent kind" >&2; exit 2; }
+			agent_kind="$2"; shift 2 ;;
+		*) echo "usage: herd [-a kind] <branch> [query...]" >&2; exit 2 ;;
+	esac
+done
 if (( $# < 1 )); then
-	echo "usage: herd <branch> [query...]" >&2
+	echo "usage: herd [-a kind] <branch> [query...]" >&2
 	exit 2
 fi
 
 branch="$1"; shift
 query="$*"
 fresh=1
+
+# validate the kind against the installed herdr's own list (skip if unparsable)
+valid_kinds=$(herdr agent start --help 2>/dev/null | sed -n 's/.*possible values: //p' | tr ',' '\n' | tr -d ' ]')
+if [[ -n "$valid_kinds" ]] && ! print -r -- "$valid_kinds" | grep -qx -- "$agent_kind"; then
+	echo "herd: unknown agent kind '$agent_kind' (valid: $(print -r -- "$valid_kinds" | tr '\n' ' '))" >&2
+	exit 2
+fi
 
 # locate the worktree for <branch> in the current repo
 json=$(herdr worktree list --cwd "$PWD") || exit 1
@@ -99,6 +116,6 @@ base="${${${branch:l}//[^a-z0-9_-]/-}:0:24}"
 [[ "$base" =~ ^[a-z] ]] || base="a$base"
 name="${base}-${RANDOM}"
 
-herdr agent start "$name" --kind opencode --pane "$agent_pane" || exit 1
+herdr agent start "$name" --kind "$agent_kind" --pane "$agent_pane" || exit 1
 herdr agent prompt "$name" "$query" || exit 1
 herdr agent focus "$name"
